@@ -58,7 +58,7 @@ fet_go <- function(genes,
 	enr <- list()
 	for (term in rownames(terms)){
 		term_genes <- terms[term,"Genes"]
-		term_genes <- base::strsplit(x=term_genes, split=";")
+		term_genes <- base::strsplit(x=term_genes, split=";")[[1]]
 		if (length(term_genes) < min_genes){
 			next
 		}
@@ -67,13 +67,13 @@ fet_go <- function(genes,
 		#  -------
 		#  s3 | s4
 		s1 <- base::intersect(genes, term_genes) # Genes in term
-		s2 <- base::set_diff(genes, term_genes) # Genes NOT in term
+		s2 <- base::setdiff(genes, term_genes) # Genes NOT in term
 		s3 <- base::intersect(bg_genes, term_genes) # BG in term
-		s4 <- base::set_diff(bg_genes, term_genes) # BG NOT in term
+		s4 <- base::setdiff(bg_genes, term_genes) # BG NOT in term
 		m <- matrix(c(length(s1), length(s2), length(s3), length(s4)), 
 					nrow=2, ncol=2, byrow=TRUE)
 		fet <- fisher.test(m)
-		ret <- c(Name=go_anno[term, "Name"], 
+		ret <- data.frame(Name=go_anno[term, "Name"], 
 				 NameSpace=go_anno[term, "NameSpace"], 
 				 OR=fet$estimate, 
 				 Null=fet$null.value, 
@@ -81,12 +81,13 @@ fet_go <- function(genes,
 				 GenesInTerm=length(s1), 
 				 GenesOutTerm=length(s2), 
 				 TermGenes=length(term_genes), 
-				 Genes=s1)
-		enr[[term]]
+				 Genes=base::paste(s1, collapse=";"))
+		enr[[term]] <- ret
 	}
 	enr_df <- do.call(base::rbind, enr)
 	enr_df$p_adj <- p.adjust(enr_df$p, method=method_correct)
 	enr_df <- enr_df[order(enr_df$p_adj, decreasing=FALSE),]
+	enr_df <- enr_df[,c("Name", "p", "p_adj",  "NameSpace", "OR", "Null", "GenesInTerm", "GenesOutTerm", "TermGenes", "Genes")]
 	return(enr_df)
 }
 
