@@ -53,7 +53,6 @@ The function `fet_go` is used to test enrichment of a set of genes using
 a Fisher's Exact Test (FET). 
 
 ```R
-
-go_df <- fet_go(gene_set, bg_genes=NULL, dir_go="data/ref/GO/")
-
+go_dat <- read_GO(dir_go="data/ref/GO/", species="human")
+go_df <- fet_go(gene_set, bg_genes=NULL, GO_data=go_dat)
 ```
