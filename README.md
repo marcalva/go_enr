@@ -47,10 +47,11 @@ with it are listed in the first column. The files are in
 ## Functions
 
 With the GO data downloaded above, you can use the functions to test for 
-enrichment based on a gene set.
+enrichment based on a gene set. To read in the anntoations, use the 
+function `read_GO` in the `R/read.R` file.
 
 The function `fet_go` is used to test enrichment of a set of genes using 
-a Fisher's Exact Test (FET). 
+a Fisher's Exact Test (FET). This function is in the `R/enrich.R`.
 
 ```R
 go_dat <- read_GO(dir_go="data/ref/GO/", species="human")
