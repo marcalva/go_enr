@@ -44,6 +44,20 @@ with it are listed in the first column. The files are in
 `data/ref/go/GO_terms.gene_list.human.txt` and 
 `data/ref/go/GO_terms.gene_list.mgi.txt`.
 
+## Downloading Reactome pathways
+
+The pathways in Reactome are downloaded only for humans currently. The 
+download page is in <https://reactome.org/download-data>. We use the 
+identifier mapping file to map genes to pathways. The physical entity 
+contains information on the location of the protein or RNA product that 
+acts in the pathway, and this is too detailed for our enrichment 
+purposes. The file downloaded is the NCBI Entrez ID mapping under the 
+"All levels of the pathway hierarchy" folder. The following script takes 
+care of downloading and storing an RDS file as well as text files 
+`R/get_reactome.R`. The R object in the RDS file 
+`data/ref/Reactome/Reactome.RDS` can be used directly into the function 
+`fet_react`.
+
 ## Functions
 
 With the GO data downloaded above, you can use the functions to test for 
@@ -57,3 +71,4 @@ a Fisher's Exact Test (FET). This function is in the `R/enrich.R`.
 go_dat <- read_GO(dir_go="data/ref/GO/", species="human")
 go_df <- fet_go(gene_set, bg_genes=NULL, GO_data=go_dat)
 ```
+
