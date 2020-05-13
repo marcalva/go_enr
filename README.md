@@ -72,3 +72,12 @@ go_dat <- read_GO(dir_go="data/ref/GO/", species="human")
 go_df <- fet_go(gene_set, bg_genes=NULL, GO_data=go_dat)
 ```
 
+You can also plot the results. The function `plot_enr` in the `R/plot.R` 
+source file can be used to create a scatterplot of the odds ratio vs. the 
+negative log 10 p-value of the enrichment terms.
+
+```R
+p <- plot_enr(go_df, color = "NameSpace")
+```
+
+

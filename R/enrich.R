@@ -62,8 +62,9 @@ fet_go <- function(genes,
 	}
 	enr_df <- do.call(base::rbind, enr)
 	enr_df$p_adj <- p.adjust(enr_df$p, method=method_correct)
-	enr_df <- enr_df[order(enr_df$p_adj, decreasing=FALSE),]
-	enr_df <- enr_df[,c("Name", "p", "p_adj",  "NameSpace", "OR", "Null", "GenesInTerm", "GenesOutTerm", "TermGenes", "Genes")]
+    enr_df$Term <- rownames(enr_df)
+	enr_df <- enr_df[order(enr_df$p, decreasing=FALSE),]
+	enr_df <- enr_df[,c("Term", "Name", "p", "p_adj",  "NameSpace", "OR", "Null", "GenesInTerm", "GenesOutTerm", "TermGenes", "Genes")]
 	return(enr_df)
 }
 
@@ -126,8 +127,9 @@ fet_react <- function(genes,
 	}
 	enr_df <- do.call(base::rbind, enr)
 	enr_df$p_adj <- p.adjust(enr_df$p, method=method_correct)
-	enr_df <- enr_df[order(enr_df$p_adj, decreasing=FALSE),]
-	enr_df <- enr_df[,c("OR", "Null", "GenesInTerm", "GenesOutTerm", "TermGenes", "Genes", "p", "p_adj")]
+    enr_df$Term <- rownames(enr_df)
+	enr_df <- enr_df[order(enr_df$p, decreasing=FALSE),]
+	enr_df <- enr_df[,c("Term", "OR", "Null", "GenesInTerm", "GenesOutTerm", "TermGenes", "Genes", "p", "p_adj")]
 	return(enr_df)
 }
 
