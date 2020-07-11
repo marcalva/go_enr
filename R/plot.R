@@ -26,12 +26,13 @@ plot_enr <- function(datf, p_thresh = 0.05, size = "GenesInTerm",
     }
     datf <- datf[k,,drop = FALSE]
     datf[,label] <- as.character(datf[,label])
+    if (sum(k) > 0){
+        datf[,label] <- sapply(datf[,label], function(s) { paste(strwrap(s, wrap_len), collapse="\n") } )
+    }
     if (top_n < nrow(datf)){
         nr <- min(top_n, nrow(datf))
         datf[(nr+1):nrow(datf), label] <- ""
     }
-    datf[,"label"] <- sapply(datf[,"label"], function(s) { paste(strwrap(s, wrap_len), collapse="\n") } )
-    paste(strwrap(s,20), collapse="\n")
     datf[,"lp"] <- -log10(datf[,"p_adj"])
     p <- ggplot(datf, aes_string(x = "OR", y = "lp", label = label)) + 
     geom_point(shape = 16, 
