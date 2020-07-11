@@ -11,11 +11,13 @@
 #' @param size Column label for point size.
 #' @param label Label for the point. Can be none or any column in data frame.
 #' @param color Column label to color points.
+#' @param wrap_len Wrap the labels so every line is at most this many 
+#'  characters long.
 #'
 #' @return ggplot object
 plot_enr <- function(datf, p_thresh = 0.05, size = "GenesInTerm", 
                      label = "Name", color = NULL, alpha = 0.2, 
-                     lab_size = 2, top_n = 15){
+                     lab_size = 2, top_n = 15, wrap_len = 60){
     require(ggplot2)
     require(ggrepel)
     k <- datf[,"p_adj"] < p_thresh
@@ -28,6 +30,8 @@ plot_enr <- function(datf, p_thresh = 0.05, size = "GenesInTerm",
         nr <- min(top_n, nrow(datf))
         datf[(nr+1):nrow(datf), label] <- ""
     }
+    datf[,"label"] <- sapply(datf[,"label"], function(s) { paste(strwrap(s, wrap_len), collapse="\n") } )
+    paste(strwrap(s,20), collapse="\n")
     datf[,"lp"] <- -log10(datf[,"p_adj"])
     p <- ggplot(datf, aes_string(x = "OR", y = "lp", label = label)) + 
     geom_point(shape = 16, 
