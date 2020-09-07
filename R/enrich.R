@@ -20,13 +20,17 @@ fet_go <- function(genes,
 	# Set genes and background
 	genes <- intersect(genes, rownames(anno))
 	if (length(genes) == 0){
-		stop("No genes given that are found in the GO annotation file")
+		warning("No genes given that are found in the GO annotation file")
 	}
+
 	if (is.null(bg_genes)){
 		bg_genes <- rownames(anno)
-	}
-	bg_genes <- setdiff(bg_genes, genes)
-	if (length(genes) == 0){
+	} else { 
+        bg_genes <- intersect(bg_genes, rownames(anno))
+	    bg_genes <- setdiff(bg_genes, genes)
+    }
+
+	if (length(bg_genes) == 0){
 		stop("No background genes found in the GO annotation file")
 	}
 
@@ -85,14 +89,16 @@ fet_react <- function(genes,
 	# Set genes and background
 	genes <- intersect(genes, react_genes)
 	if (length(genes) == 0){
-		stop("None of genes are found in the annotations")
+		warning("None of genes are found in the annotations")
 	}
+
 	if (is.null(bg_genes)){
 		bg_genes <- react_genes
 	} else {
         bg_genes <- intersect(bg_genes, react_genes)
 	    bg_genes <- setdiff(bg_genes, genes)
     }
+
 	if (length(bg_genes) == 0){
 		stop("No background genes found in the annotations")
 	}
