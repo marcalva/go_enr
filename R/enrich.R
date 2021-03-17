@@ -9,6 +9,7 @@ fet_go <- function(genes,
 				   GO_data, 
 				   bg_genes=NULL, 
 				   min_genes=30, 
+                   prior=0.5, 
 				   method_correct="fdr"){
 	# GO term annotations
 	go_anno <- GO_data$go_anno
@@ -46,7 +47,10 @@ fet_go <- function(genes,
 		s2 <- base::setdiff(genes, term_genes) # Genes NOT in term
 		s3 <- base::intersect(bg_genes, term_genes) # BG in term
 		s4 <- base::setdiff(bg_genes, term_genes) # BG NOT in term
-		m <- matrix(c(length(s1), length(s2), length(s3), length(s4)), 
+		m <- matrix(c(length(s1) + prior, 
+                      length(s2) + prior, 
+                      length(s3) + prior, 
+                      length(s4) + prior), 
 					nrow=2, ncol=2, byrow=TRUE)
 		fet <- fisher.test(m)
 		ret <- data.frame(Name=go_anno[term, "Name"], 
@@ -77,6 +81,7 @@ fet_react <- function(genes,
                       reactome, 
                       bg_genes=NULL, 
                       min_genes=30, 
+                      prior=0.5, 
                       method_correct="fdr"){
 	# Genes to pathway
     react_genes <- rownames(reactome$genes2pathway)
@@ -113,7 +118,10 @@ fet_react <- function(genes,
 		s2 <- base::setdiff(genes, path_genes) # Genes NOT in pathway
 		s3 <- base::intersect(bg_genes, path_genes) # BG in pathway
 		s4 <- base::setdiff(bg_genes, path_genes) # BG NOT in pathway
-		m <- matrix(c(length(s1), length(s2), length(s3), length(s4)), 
+		m <- matrix(c(length(s1) + prior, 
+                      length(s2) + prior, 
+                      length(s3) + prior,
+                      length(s4) + prior), 
 					nrow=2, ncol=2, byrow=TRUE)
 		fet <- fisher.test(m)
 		ret <- data.frame(OR=fet$estimate, 
