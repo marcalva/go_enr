@@ -40,7 +40,8 @@ plot_enr <- function(datf, p_thresh = 0.05, size = "GenesInTerm",
                alpha = alpha) + 
     geom_text_repel(size = lab_size, segment.size = 0.2) + 
     xlab("Odds Ratio") + ylab("-log p") + 
-    theme_bw()
+    theme_bw() + 
+    guides(color = guide_legend(override.aes = list(size = 1, alpha = 1)))
     return(p)
 }
 
