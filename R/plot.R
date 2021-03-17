@@ -17,7 +17,8 @@
 #' @return ggplot object
 plot_enr <- function(datf, p_thresh = 0.05, size = "GenesInTerm", 
                      label = "Name", color = NULL, alpha = 0.2, 
-                     lab_size = 2, top_n = 15, wrap_len = 60){
+                     lab_size = 2, top_n = 15, wrap_len = 60, 
+                     add_vline = FALSE, vline_col = "red"){
     require(ggplot2)
     require(ggrepel)
     k <- datf[,"p_adj"] < p_thresh
@@ -34,8 +35,9 @@ plot_enr <- function(datf, p_thresh = 0.05, size = "GenesInTerm",
         datf[(nr+1):nrow(datf), label] <- ""
     }
     datf[,"lp"] <- -log10(datf[,"p_adj"])
-    p <- ggplot(datf, aes_string(x = "OR", y = "lp", label = label)) + 
-    geom_point(shape = 16, 
+    p <- ggplot(datf, aes_string(x = "OR", y = "lp", label = label))
+    if (add_vline) p <- p + geom_vline(xintercept = 0, color = "red", linetype="dashed")
+    p <- p + geom_point(shape = 16, 
                aes_string(size = size, color = color), 
                alpha = alpha) + 
     geom_text_repel(size = lab_size, segment.size = 0.2) + 
