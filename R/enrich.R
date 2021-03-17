@@ -85,7 +85,7 @@ fet_react <- function(genes,
                       reactome, 
                       bg_genes=NULL, 
                       min_genes=30, 
-                      prior=0.5, 
+                      prior=1, 
                       method_correct="fdr"){
 	# Genes to pathway
     react_genes <- rownames(reactome$genes2pathway)
