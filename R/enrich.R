@@ -9,7 +9,7 @@ fet_go <- function(genes,
 				   GO_data, 
 				   bg_genes=NULL, 
 				   min_genes=30, 
-                   prior=0.5, 
+                   prior=1, 
 				   method_correct="fdr"){
 	# GO term annotations
 	go_anno <- GO_data$go_anno
