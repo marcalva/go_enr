@@ -7,7 +7,7 @@ dir.create(dir_out, showWarnings=FALSE, recursive=TRUE)
 
 
 #########################################################################
-# Gene ontologies
+# Gene ontology terms, definitions, descriptions.
 #########################################################################
 
 geo = readLines("http://snapshot.geneontology.org/ontology/go-basic.obo")
@@ -23,15 +23,17 @@ while (i <= length(geo)){
 		name = sub("name: ", "", geo[i])
 		i = i+1
 		namespace = sub("namespace: ", "", geo[i])
-		geo_dict[[id]] = c(name, namespace)
+        i = i+1
+        def = sub("def: ", "",  geo[i])
+		geo_dict[[id]] = c(name, namespace, def)
 	}
 	i = i+1
 }
 
 geo_df = do.call(rbind, geo_dict)
-colnames(geo_df) = c("Name", "NameSpace")
+colnames(geo_df) = c("Name", "NameSpace", "Definition")
 
-write.table(geo_df, paste0(dir_out, "GO_id.name.namespace.txt"),
+write.table(geo_df, paste0(dir_out, "term_description.txt"),
 			row.names=TRUE, col.names=NA, sep="\t", quote=FALSE)
 
 #########################################################################
@@ -39,7 +41,7 @@ write.table(geo_df, paste0(dir_out, "GO_id.name.namespace.txt"),
 #########################################################################
 
 #########################################################################
-# Gene annotations
+# Genes to terms and annotations
 #########################################################################
 
 con = gzcon(url("http://geneontology.org/gene-associations/goa_human.gaf.gz"))
@@ -52,12 +54,19 @@ genes = unique(goa[,3])
 goa_dict = list()
 for (gene in genes){
 	df = goa[goa[,3] == gene,]
-	uniprots = paste(unique(df[,2]), collapse=";")
-	descr = paste(unique(df[,10]), collapse=";")
-	go_terms = paste(unique(df[,5]), collapse=";")
-	goa_dict[[gene]] = c(uniprots, descr, go_terms)
+	uniprots = paste(unique(df[,2]), collapse=",")
+	descr = paste(unique(df[,10]), collapse=",")
+	go_terms = paste(unique(df[,5]), collapse=",")
+    goa_dict[[gene]] = c(go_terms, descr, uniprots)
 }
 goa_df = as.data.frame(do.call(rbind, goa_dict), stringsAsFactors=FALSE)
+colnames(goa_df) = c("Terms", "Description", "UniProtID")
+
+genes2terms <- goa_df[,"Terms",drop=FALSE]
+outfn <- paste0(dir_out, "genes2terms.txt")
+write.table(genes2terms, outfn, row.names=TRUE, col.names=NA, sep="\t", quote=FALSE)
+
+
 colnames(goa_df) = c("UniProtID", "Description", "GO_Terms")
 
 write.table(goa_df, paste0(dir_out, "GO_gene_terms.human.txt"),

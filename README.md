@@ -1,6 +1,24 @@
 
 # GO Enrichment
 
+## Setup
+
+These scripts can download ontology data from *GO*, *Reactome*, and 
+*KEGG*. Data is downloaded and formatted into the following files
+
+* **genes2terms.txt** text file where the first column gives the gene 
+  name and the second gives a comma-separated list of IDs. These IDs 
+  correspond to the annotation, ontology, or pathway of the resource.
+* **terms2genes.txt** text file where the first column gives the 
+  term ID and the second column gives a comma-separated list of gene 
+  names. The terms IDs are the same as those listed above.
+* **term_description.txt** text file where the first column gives 
+  the term ID and later columns give meta data. What meta data 
+  is given here depends on the source of the annotations.
+* **pathway.rds** RDS file that contains each of the above data stored 
+  in an RDS file. The RDS file contains a list of 3 elements, each 
+  of the above.
+
 ## Downloading GO terms
 
 Use the script:

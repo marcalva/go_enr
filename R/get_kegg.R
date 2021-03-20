@@ -27,7 +27,6 @@ get_pathway_genes <- function(org){
     s[length(s) + 1] <- length(pathways)+1
 
     for (i in 1:(length(s)-1)){
-        message(i)
         Sys.sleep(0.1)
         query <- keggGet(names(pathways)[s[i]:(s[i+1] - 1)])
         for (q in query){
@@ -80,30 +79,33 @@ pathways.df <- data.frame("Pathway" = names(pathway_list),
 
 
 # write output
-dirout <- "data/ref/KEGG/"
-dir.create(dirout, recursive = TRUE, showWarnings = FALSE)
+dir_out <- "data/ref/KEGG/"
+dir.create(dir_out, recursive = TRUE, showWarnings = FALSE)
 
 out.l <- list("pathway.list" = pathway_list, 
               "genes2pathway" = genes2pathway.df, 
               "pathway2genes" = pathway2genes.df, 
               "pathways" = pathways.df)
-outfn <- paste0(dirout,  "KEGG.rds")
+outfn <- paste0(dir_out,  "KEGG.rds")
 saveRDS(out.l, outfn)
 
-outfn <- paste0(dirout,  "genes2pathway.human.txt")
+outfn <- paste0(dir_out,  "genes2terms.txt")
 write.table(genes2pathway.df, outfn, row.names=FALSE, col.names=TRUE, 
             quote=FALSE, sep="\t")
 
-outfn <- paste0(dirout,  "pathway2genes.human.txt")
+outfn <- paste0(dir_out,  "terms2genes.txt")
 write.table(pathway2genes.df, outfn, row.names=FALSE, col.names=TRUE, 
             quote=FALSE, sep="\t")
 
-outfn <- paste0(dirout,  "pathway_description.human.txt")
+outfn <- paste0(dir_out,  "term_description.txt")
 write.table(pathways.df, outfn, row.names=FALSE, col.names=TRUE, 
             quote=FALSE, sep="\t")
 
-outfn <- paste0(dirout,  "genes.human.txt")
-writeLines(hsa_genes, outfn)
+# outfn <- paste0(dir_out,  "genes.human.txt")
+# writeLines(hsa_genes, outfn)
 
+date_df <- date()
+write.table(date_df, paste0(dir_out, "download_date.txt"), 
+	row.names=FALSE, col.names=FALSE, quote=TRUE)
 
 
