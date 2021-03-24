@@ -2,77 +2,67 @@
 library(AnnotationDbi)
 library(org.Hs.eg.db)
 
-
-dir_out = "data/ref/Reactome/"
-dir.create(dir_out, showWarnings=FALSE, recursive=TRUE)
-
-# Reactome database
+# Download Reactome database
+# NCBI Entrez returns 1:1 mapping to gene symbols
 rea <- readLines('https://reactome.org/download/current/NCBI2Reactome_All_Levels.txt')
 rea_l <- lapply(rea, function(i) strsplit(i, "\t")[[1]])
 rea_df <- do.call(rbind, rea_l)
 rea_df <- rea_df[rea_df[,6] == "Homo sapiens",]
 
-# symbols <- mapIds(org.Hs.eg.db, rea_df[,1], 'SYMBOL', 'ENSEMBL')
 symbols <- mapIds(org.Hs.eg.db, rea_df[,1], 'SYMBOL', 'ENTREZID')
 rea_df <- cbind(symbols, rea_df)
 rea_df <- rea_df[!is.na(rea_df[,1]),]
 
-genes <- unique(rea_df[,1])
+# genes to terms
+genes_dict <- by(data = rea_df, INDICES = rea_df[,1], FUN = function(gene_df){
+                 terms <- paste(gene_df[,3], collapse=',')
+                 return(terms) })
+genes_dict <- as.list(genes_dict)
+genes2terms <- as.data.frame(do.call(rbind, genes_dict), stringsAsFactors=FALSE)
+colnames(genes2terms) <- "Terms"
 
-pathways <- unique(rea_df[,5])
+# terms to genes
+terms_dict <- by(data = rea_df, INDICES = rea_df[,3], FUN = function(term_df){
+                 genes <- paste(term_df[,1], collapse=',')
+                 return(genes) })
+terms_dict <- as.list(terms_dict)
+terms2genes <- as.data.frame(do.call(rbind, terms_dict), stringsAsFactors=FALSE)
+colnames(terms2genes) <- "Genes"
 
-rea_dict <- list()
-pathways_dict <- list()
-for (gene in genes){
-    datf <- rea_df[rea_df[,1] == gene,,drop=FALSE]
-    hsa <- datf[,3]
-    p_url <- datf[,4]
-    descr <- datf[,5]
-    keep <- !duplicated(descr)
-    hsa <- paste(hsa[keep], collapse=";")
-    p_url <- paste(p_url[keep], collapse=";")
-    descr <- paste(descr[keep], collapse=";")
-    rea_dict[[gene]] <- c(hsa, 
-                          p_url, 
-                          descr)
-    for (p in datf[,5]){
-        pathways_dict[[p]] <- c(pathways_dict[[p]], gene)
-    }
-}
+# terms descriptions
+path2sum <- readLines('https://reactome.org/download/current/pathway2summation.txt')
+path2sum_l <- lapply(path2sum, function(i) strsplit(i, "\t")[[1]])
+path2sum_df <- do.call(rbind, path2sum_l)
+k <- !duplicated(path2sum_df[,1])
+path2sum_df <- path2sum_df[k,]
+rownames(path2sum_df) <- path2sum_df[,1]
+path2sum_df <- path2sum_df[,-1]
+colnames(path2sum_df) <- c("Name", "Description")
 
-for (p in names(pathways_dict)){
-    g <- unique(pathways_dict[[p]])
-    g <- paste(g, collapse=";")
-    pathways_dict[[p]] <- g
-}
+k <- rownames(path2sum_df) %in% rownames(terms2genes)
+path2sum_df <- path2sum_df[k,]
 
-rea_datf <- as.data.frame(do.call(rbind, rea_dict), stringsAsFactors=FALSE)
-write.table(rea_datf, 
-            paste0(dir_out, "genes2pathway.human.txt"),
-			row.names=TRUE, 
-            col.names=NA, 
-            sep="\t", 
-            quote=FALSE)
+#########################################################################
+# Write output
+#########################################################################
+
+dir_out <- "data/human/Reactome/"
+dir.create(dir_out, showWarnings=FALSE, recursive=TRUE)
+
+outfn <- paste0(dir_out, "term_description.txt")
+write.table(path2sum_df, outfn, row.names=TRUE, col.names=NA, sep="\t", quote=TRUE)
+
+outfn <- paste0(dir_out, "genes2terms.txt")
+write.table(genes2terms, outfn, row.names=TRUE, col.names=NA, sep="\t", quote=FALSE)
+
+outfn <- paste0(dir_out, "terms2genes.txt")
+write.table(terms2genes, outfn, row.names=TRUE, col.names=NA, sep="\t", quote=FALSE)
 
 
-path_datf <- as.data.frame(do.call(rbind, pathways_dict), stringsAsFactors=FALSE)
-colnames(path_datf) <- "Genes"
-write.table(path_datf, 
-            paste0(dir_out, "pathway2genes.human.txt"),
-			row.names=TRUE, 
-            col.names=NA, 
-            sep="\t", 
-            quote=FALSE)
+out.l <- list("term_description" = path2sum_df, 
+              "genes2terms" = genes2terms, 
+              "terms2genes" = terms2genes)
 
-reactome <- list("genes2pathway" = rea_datf, 
-                 "pathway2genes" = path_datf)
-saveRDS(reactome, paste0(dir_out, "Reactome.RDS"))
-
-# Save download date
-date_df <- date()
-write.table(date_df, 
-            paste0(dir_out, "download_date.txt"), 
-            row.names=FALSE, 
-            col.names=FALSE, 
-            quote=TRUE)
+outfn <- paste0(dir_out,  "pathway.rds")
+saveRDS(out.l, outfn)
 

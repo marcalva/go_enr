@@ -13,68 +13,23 @@ These scripts can download ontology data from *GO*, *Reactome*, and
   term ID and the second column gives a comma-separated list of gene 
   names. The terms IDs are the same as those listed above.
 * **term_description.txt** text file where the first column gives 
-  the term ID and later columns give meta data. What meta data 
-  is given here depends on the source of the annotations.
+  the term ID and later columns give meta data. 
+  The column "Name" gives the short descrpition name of the ontology 
+  term, while the column "Description" gives a longer description.
+  Additional meta data depends on the source of the annotations.
 * **pathway.rds** RDS file that contains each of the above data stored 
   in an RDS file. The RDS file contains a list of 3 elements, each 
   of the above.
 
-## Downloading GO terms
+## Downloading data
 
-Use the script:
+Run the following scripts
 
 ```bash
 Rscript R/get_go.R
+Rscript R/get_kegg.R
+Rscript R/get_go.human.R
 ```
-
-to download the latest gene annotations from GO. They are 
-downloaded to `data/ref/GO`. If you don't want to download them, you can 
-use the ones already present downloaded July 6th 2019.
-
-First, the gene ontologies themselves are downloaded to 
-`data/ref/go/GO_id.name.namespace.txt`. This contains info on the 
-ontology terms. The rownames are the GO ID (e.g. GO:0000001). The 
-first column is the name of the GO term (e.g. mitochondrion inheritance) 
-and the second column is the namespace (one of **biological_process**, 
-**molecular_function** or **cellular component**). 
-
-After downloading the ontologies, the genes are annotated with them. The 
-annotations are downloaded to `data/ref/go/GO_gene_terms.human.txt` and 
-`data/ref/go/GO_gene_terms.mgi.txt`. The row names are the gene IDs, the 
-first column is the UniProtID, the second column is a description of the 
-gene, and the third column contains the GO term IDs associated with gene. 
-If there are multiple GO terms associated with the gene, they are separated 
-by semicolons.
-
-After getting the gene annotations, they are expanded so that we can directly 
-read all the ontologies instead of the GO term ID. These expanded annotations 
-are placed in the files `data/ref/go/GO_gene_terms.annotations.human.txt` and 
-`data/ref/go/GO_gene_terms.annotations.mgi.txt`. The first columns are the 
-same as the annotations: the row names are the gene IDs, the first column 
-is the UniProtID, the second column is a description of the gene, and the 
-third column contains the GO term IDs associated with gene. Then, the 
-fourth, fifth, and sixth column contain the **MolecularFunction**, 
-**BiologicalProcess**, and **CellularComponent** terms associated with the 
-gene. Multiple terms are separated by semicolons.
-
-Then, the reverse is done where for each GO term ID, all the gene names associated 
-with it are listed in the first column. The files are in 
-`data/ref/go/GO_terms.gene_list.human.txt` and 
-`data/ref/go/GO_terms.gene_list.mgi.txt`.
-
-## Downloading Reactome pathways
-
-The pathways in Reactome are downloaded only for humans currently. The 
-download page is in <https://reactome.org/download-data>. We use the 
-identifier mapping file to map genes to pathways. The physical entity 
-contains information on the location of the protein or RNA product that 
-acts in the pathway, and this is too detailed for our enrichment 
-purposes. The file downloaded is the NCBI Entrez ID mapping under the 
-"All levels of the pathway hierarchy" folder. The following script takes 
-care of downloading and storing an RDS file as well as text files 
-`R/get_reactome.R`. The R object in the RDS file 
-`data/ref/Reactome/Reactome.RDS` can be used directly into the function 
-`fet_react`.
 
 ## Functions
 

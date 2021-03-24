@@ -1,6 +1,10 @@
 
 library(KEGGREST)
 
+#########################################################################
+# Functions
+#########################################################################
+
 #' parse genes from kegg list
 parse_genes <- function(x){
     genes <- sapply(x, function(g) strsplit(g, "[,;]")[[1]][1])
@@ -39,17 +43,26 @@ get_pathway_genes <- function(org){
     return(pathway_list)
 }
 
+#########################################################################
+# Download data
+#########################################################################
+
 org <- "hsa"
 
 hsa_genes <- all_genes("hsa")
 hsa_genes <- unique(hsa_genes)
 pathway_list <- get_pathway_genes("hsa")
 
+#########################################################################
+# Write output
+#########################################################################
+
 path_genes <- c()
 for (p in pathway_list){
     path_genes <- c(path_genes, p$GENE)
 }
 path_genes <- unique(path_genes)
+
 
 # genes to pathway
 genes2pathway.l <- list()
@@ -60,46 +73,47 @@ for (p in pathway_list){
     }
 }
 
-genes2pathway.df <- data.frame("Gene" = names(genes2pathway.l), 
-                               "Pathways" = sapply(genes2pathway.l, function(p){
-                                                   paste(p, collapse=",") })
-                               )
+genes2pathway.df <- data.frame("Terms" = sapply(genes2pathway.l, function(p){
+                                                   paste(p, collapse=",") }), 
+                               stringsAsFactors=FALSE)
+rownames(genes2pathway.df) <- names(genes2pathway.l)
 
 # pathway to genes
-pathway2genes.df <- data.frame("Pathway" = names(pathway_list), 
-                               "Genes" = sapply(pathway_list, function(p){
-                                                paste(p$GENE, collapse=",") })
-                               )
+pathway2genes.df <- data.frame("Genes" = sapply(pathway_list, function(p){
+                                                paste(p$GENE, collapse=",") }),
+                               stringsAsFactors=FALSE)
+rownames(pathway2genes.df) <- names(pathway_list)
 
 # pathway info
-pathways.df <- data.frame("Pathway" = names(pathway_list), 
-                          "Name" = sapply(pathway_list, function(p) p$NAME), 
-                          "Description" = sapply(pathway_list, function(p) paste0(p$DESCRIPTION, collapse=';')))
+pathways.df <- data.frame("Name" = sapply(pathway_list, function(p) p$NAME), 
+                          "Description" = sapply(pathway_list, function(p) paste0(p$DESCRIPTION, collapse=';')), 
+                          stringsAsFactors=FALSE)
+rownames(pathways.df) <- names(pathway_list)
 
 
 
 # write output
-dir_out <- "data/ref/KEGG/"
+dir_out <- "data/human/KEGG/"
 dir.create(dir_out, recursive = TRUE, showWarnings = FALSE)
 
 out.l <- list("pathway.list" = pathway_list, 
-              "genes2pathway" = genes2pathway.df, 
-              "pathway2genes" = pathway2genes.df, 
-              "pathways" = pathways.df)
-outfn <- paste0(dir_out,  "KEGG.rds")
+              "genes2terms" = genes2pathway.df, 
+              "terms2genes" = pathway2genes.df, 
+              "term_description" = pathways.df)
+outfn <- paste0(dir_out,  "pathway.rds")
 saveRDS(out.l, outfn)
 
 outfn <- paste0(dir_out,  "genes2terms.txt")
-write.table(genes2pathway.df, outfn, row.names=FALSE, col.names=TRUE, 
+write.table(genes2pathway.df, outfn, row.names=TRUE, col.names=NA, 
             quote=FALSE, sep="\t")
 
 outfn <- paste0(dir_out,  "terms2genes.txt")
-write.table(pathway2genes.df, outfn, row.names=FALSE, col.names=TRUE, 
+write.table(pathway2genes.df, outfn, row.names=TRUE, col.names=NA, 
             quote=FALSE, sep="\t")
 
 outfn <- paste0(dir_out,  "term_description.txt")
-write.table(pathways.df, outfn, row.names=FALSE, col.names=TRUE, 
-            quote=FALSE, sep="\t")
+write.table(pathways.df, outfn, row.names=TRUE, col.names=NA, 
+            quote=TRUE, sep="\t")
 
 # outfn <- paste0(dir_out,  "genes.human.txt")
 # writeLines(hsa_genes, outfn)
