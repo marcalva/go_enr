@@ -3,33 +3,36 @@
 
 ## Setup
 
-These scripts can download ontology data from *GO*, *Reactome*, and 
-*KEGG*. Data is downloaded and formatted into the following files
-
-* **genes2terms.txt** text file where the first column gives the gene 
-  name and the second gives a comma-separated list of IDs. These IDs 
-  correspond to the annotation, ontology, or pathway of the resource.
-* **terms2genes.txt** text file where the first column gives the 
-  term ID and the second column gives a comma-separated list of gene 
-  names. The terms IDs are the same as those listed above.
-* **term_description.txt** text file where the first column gives 
-  the term ID and later columns give meta data. 
-  The column "Name" gives the short descrpition name of the ontology 
-  term, while the column "Description" gives a longer description.
-  Additional meta data depends on the source of the annotations.
-* **pathway.rds** RDS file that contains each of the above data stored 
-  in an RDS file. The RDS file contains a list of 3 elements, each 
-  of the above.
-
 ## Downloading data
 
-Run the following scripts
+Run the following scripts to download ontology data from *GO*, *Reactome*, 
+and *KEGG*.
 
 ```bash
 Rscript R/get_go.R
 Rscript R/get_kegg.R
 Rscript R/get_go.human.R
 ```
+
+Data is formatted into the following files
+
+* **genes2terms.txt** text file that maps genes to ontology terms. The 
+columns correspond to
+    1. gene symbol
+    2. comma-separated list of ontology term IDs.
+* **terms2genes.txt** text file that maps ontology terms to genes in the 
+term. The columns correspond to
+    1. ontology term ID
+    2. comma-separated list of gene symbols
+* **term_description.txt** text file that gives the description of ontology 
+terms. The first column gives the ontology term ID and later columns give 
+descriptive information. There are always two columns: "Name" gives the 
+short descripton and "Description" gives a more detailed description.
+Additional meta data depends on the source of the annotations.
+* **pathway.rds** RDS file that contains a list, where each of the 
+elements gives a data frame. There are three data frames named 
+"genes2terms", "terms2genes", and "term_description". There could be 
+additional data frames depending on the annotation source.
 
 ## Functions
 
