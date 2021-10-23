@@ -47,3 +47,82 @@ plot_enr <- function(datf, p_thresh = 0.05, size = "GenesInTerm",
     return(p)
 }
 
+# reverse and log transform a vector of values
+log10_rev_trans <- function(x){
+    trans_new("log10_rev",
+              function(x) {x = log10(rev(x)); x[is.na(x)] = log10(0.05); return(x)},
+              function(x) {x = rev(10 ^ (x)); x[is.na(x)] = 0.05; return(x)},
+              log_breaks(10),
+              domain = c(1e-100, Inf))
+}
+
+log10_rev_breaks <- function(x, n=5){
+
+    rng <- range(x, na.rm = TRUE)
+    lxmin <- floor(log10(rng[1])) + log10(2)
+    lxmax <- ceiling(log10(rng[2])) - log10(2)
+
+    lby <- floor((lxmax - lxmin)/n) + 1
+
+    breaks <- rev(10^seq(lxmax, lxmin, by=-lby))
+    # breaks <- 10^seq(lxmin, lxmax, lby)
+    return(breaks)
+} 
+    
+format_power10 <- function(x){
+    x <- signif(x, digits = 2)
+    lapply(x, function(y){
+           pow_num <- floor(log10(y))
+           base_num <- y * 10^-pow_num
+           # if (pow_num <= 2 && pow_num >= -2) bquote(.(y))
+           # else bquote(.(base_num) %*% 10^.(pow_num))
+           bquote(.(base_num) %*% 10^.(pow_num))
+              })
+}
+
+log10_rev_trans <- function(x){
+    trans <- function(x) -log(x, 10)
+    inv <- function(x) 10^(-x)
+    trans_new("log10_rev", trans, inv, breaks = log10_rev_breaks, domain = c(1e-100, Inf))
+    trans_new("log10_rev", trans, inv, breaks = log10_rev_breaks,
+              format = format_power10, domain = c(1e-100, Inf))
+    # format = function(x) math_format(10^.x),
+}
+
+heatmap_enr <- function(lor_df, p_df, max_p = 0.05){
+    require(ggplot2)
+    require(scales)
+    require(reshape2)
+
+    # melt data frames
+    lor_df <- lor_df[rownames(p_df), colnames(p_df)]
+    p_dfm <- reshape2::melt(as.matrix(p_df))
+    lor_dfm <- reshape2::melt(as.matrix(lor_df))
+
+    lor_dfm[,"p"] <- p_dfm[,"value"]
+    # colnames(lor_dfm)[colnames(lor_dfm) == "value"] <- "LOR"
+
+    # remove entries with p > max_p
+    kp <- lor_dfm[,"p"] <= max_p
+    lor_dfm <- lor_dfm[kp,,drop=FALSE]
+    
+    minp <- min(lor_dfm[,"p"], na.rm = TRUE)
+    maxv <- max(abs(lor_dfm[,"value"]), na.rm = TRUE)
+
+    p <- ggplot(lor_dfm, aes_string(x = "Var1", y = "Var2", color = "value", size = "p")) + 
+        geom_point() + 
+        theme_bw() + 
+        scale_size(trans="log10_rev", limits = c(0.05, minp)) + 
+        scale_color_distiller(palette = "RdYlBu",
+                              name = "log\nodds\nratio",
+                              limits = c(-1, 1) * maxv) + 
+        theme(text = element_text(size = 14),
+              axis.title = element_blank(),
+              axis.text.x = element_text(angle=90, vjust=0.5, hjust=1),
+              axis.ticks =  element_blank(),
+              panel.border = element_blank()) +
+        guides(size = guide_legend(override.aes = list(shape = 1, color = "black")))
+
+    return(p)
+}
+

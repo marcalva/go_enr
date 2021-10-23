@@ -21,6 +21,7 @@
 #'  contingency table before running Fisher's Exact test.
 #' @param method_correct p-value correction method
 #' @return data frame with ontology enrichments, sorted by p-value.
+#'
 fet_enr <- function(genes, 
                     genes2terms, 
                     terms2genes, 
