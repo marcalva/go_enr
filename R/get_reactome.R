@@ -58,11 +58,17 @@ write.table(genes2terms, outfn, row.names=TRUE, col.names=NA, sep="\t", quote=FA
 outfn <- paste0(dir_out, "terms2genes.txt")
 write.table(terms2genes, outfn, row.names=TRUE, col.names=NA, sep="\t", quote=FALSE)
 
-
-out.l <- list("term_description" = path2sum_df, 
+out.l <- list("Source" = "Reactome",
+              "Species" = "Human", 
               "genes2terms" = genes2terms, 
-              "terms2genes" = terms2genes)
+              "terms2genes" = terms2genes, 
+              "term_description" = path2sum_df)
 
 outfn <- paste0(dir_out,  "pathway.rds")
 saveRDS(out.l, outfn)
+
+# Save download date
+date_df <- date()
+write.table(date_df, paste0(dir_out, "download_date.txt"), 
+	row.names=FALSE, col.names=FALSE, quote=TRUE)
 

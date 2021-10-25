@@ -1,6 +1,6 @@
 
 # Read in GO data
-read_GO <- function(dir_go="data/ref/GO/", species="human"){
+read_GO <- function(dir_go="data/human/GO/", species="human"){
 	# GO term annotations
 	go_anno_fn <- paste0(dir_go, "GO_id.name.namespace.txt")
 	go_anno <- read.table(go_anno_fn, row.names=1, header=TRUE, stringsAsFactors=FALSE, sep="\t", comment="", quote="")

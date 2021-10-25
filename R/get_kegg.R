@@ -90,13 +90,16 @@ pathways.df <- data.frame("Name" = sapply(pathway_list, function(p) p$NAME),
                           stringsAsFactors=FALSE)
 rownames(pathways.df) <- names(pathway_list)
 
-
+# get category
+pathways.df[,"Class"] <- sapply(pathway_list[rownames(pathways.df)], 
+                                   function(x){ x[["CLASS"]] })
 
 # write output
 dir_out <- "data/human/KEGG/"
 dir.create(dir_out, recursive = TRUE, showWarnings = FALSE)
 
-out.l <- list("pathway.list" = pathway_list, 
+out.l <- list("Source" = "KEGG", 
+              "Species" = "Human", 
               "genes2terms" = genes2pathway.df, 
               "terms2genes" = pathway2genes.df, 
               "term_description" = pathways.df)

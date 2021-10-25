@@ -1,12 +1,27 @@
 
-# GO Enrichment
+# Gene ontology enrichment
 
 ## Setup
 
+The download scripts rely on the following packages
+
+* [KEGGREST](https://bioconductor.org/packages/release/bioc/html/KEGGREST.html)
+* [AnnotationDbi](https://bioconductor.org/packages/release/bioc/html/AnnotationDbi.html)
+* [org.Hs.eg.db](http://bioconductor.org/packages/release/data/annotation/html/org.Hs.eg.db.html)
+
+The plotting functions require
+
+* [ggplot2](https://cran.r-project.org/web/packages/ggplot2/index.html)
+* [ggrepel](https://cran.r-project.org/web/packages/ggrepel/index.html)
+* [scales](https://cran.r-project.org/web/packages/scales/index.html)
+* [reshape2](https://cran.r-project.org/web/packages/reshape2/index.html)
+
 ## Downloading data
 
-Run the following scripts to download ontology data from *GO*, *Reactome*, 
-and *KEGG*.
+These scripts calculate enrichments for the gene ontology (**GO**), **Reactome**, 
+and **KEGG** database annotations. The repo already comes with pre-downloaded 
+data, but can be updated by downloading the latest versions with the 
+following scripts.
 
 ```bash
 Rscript R/get_go.R
@@ -25,20 +40,22 @@ term. The columns correspond to
     1. ontology term ID
     2. comma-separated list of gene symbols
 * **term_description.txt** text file that gives the description of ontology 
-terms. The first column gives the ontology term ID and later columns give 
-descriptive information. There are always two columns: "Name" gives the 
-short descripton and "Description" gives a more detailed description.
-Additional meta data depends on the source of the annotations.
-* **pathway.rds** RDS file that contains a list, where each of the 
-elements gives a data frame. There are three data frames named 
-"genes2terms", "terms2genes", and "term_description". There could be 
-additional data frames depending on the annotation source.
+terms. The first column gives the ontology term ID. The second column (Name) gives 
+a descriptive name of the ontology term. The third column (Description) gives a 
+desrciption of the term. The go file has a fourth column (NameSpace)
+that classifies the ontology term into one of "biological_process", 
+"cellular_component", or "molecular_function". The kegg file has a fourth 
+column (Class) that gives the class of the ontology.
+* **pathway.rds** RDS file that contains a list with three data frames 
+corresponding to the files described above.
+There could be additional data frames depending on the annotation source.
 
 ## Functions
 
-With the GO data downloaded above, you can use the functions to test for 
-enrichment based on a gene set. To read in the anntoations, use the 
-function `read_GO` in the `R/read.R` file.
+The enrichment for pathways/ontologies is calculated using a Fisher's 
+Exact Test (FET). The file `R/enrich.R` contains the enrichment functions
+`fet_go` to perform this. Annotations can be read from an RDS object 
+using the `readRDS` function.
 
 The function `fet_go` is used to test enrichment of a set of genes using 
 a Fisher's Exact Test (FET). This function is in the `R/enrich.R`.

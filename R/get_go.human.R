@@ -24,8 +24,11 @@ while (i <= length(geo)){
 	i <- i+1
 }
 
-geo_df <- do.call(rbind, geo_dict)
+geo_df <- as.data.frame(do.call(rbind, geo_dict))
 colnames(geo_df) <- c("Name", "NameSpace", "Description")
+desc_nq <- gsub("\"", "", geo_df[,"Description"])
+geo_df[,"Description"] <- desc_nq
+geo_df <- geo_df[,c("Name", "Description", "NameSpace")]
 
 #########################################################################
 # Genes to terms
@@ -81,9 +84,11 @@ write.table(terms2genes, outfn, row.names=TRUE, col.names=NA, sep="\t", quote=FA
 outfn <- paste0(dir_out, "gene_description.txt.txt")
 write.table(genes_descr, outfn, row.names=TRUE, col.names=NA, sep="\t", quote=FALSE)
 
-out.l <- list("term_description" = geo_df, 
+out.l <- list("Source" = "GO", 
+              "Species" = "Human", 
               "genes2terms" = genes2terms, 
               "terms2genes" = terms2genes, 
+              "term_description" = geo_df,
               "gene_description" = genes_descr)
 
 outfn <- paste0(dir_out,  "pathway.rds")
