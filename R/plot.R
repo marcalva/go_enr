@@ -77,6 +77,7 @@ format_power10 <- function(x){
            # if (pow_num <= 2 && pow_num >= -2) bquote(.(y))
            # else bquote(.(base_num) %*% 10^.(pow_num))
            bquote(.(base_num) %*% 10^.(pow_num))
+           # bquote(.(base_num) ~ .(pow_num))
               })
 }
 
@@ -84,23 +85,36 @@ log10_rev_trans <- function(x){
     trans <- function(x) -log(x, 10)
     inv <- function(x) 10^(-x)
     trans_new("log10_rev", trans, inv, breaks = log10_rev_breaks, domain = c(1e-100, Inf))
-    trans_new("log10_rev", trans, inv, breaks = log10_rev_breaks,
-              format = format_power10, domain = c(1e-100, Inf))
+    # trans_new("log10_rev", trans, inv, breaks = log10_rev_breaks,
+    #          format = format_power10, domain = c(1e-100, Inf))
     # format = function(x) math_format(10^.x),
 }
 
-heatmap_enr <- function(lor_df, p_df, max_p = 0.05){
+heatmap_enr <- function(lor_df, p_df, max_p = 0.05, clust=TRUE){
     require(ggplot2)
     require(scales)
     require(reshape2)
 
-    # melt data frames
     lor_df <- lor_df[rownames(p_df), colnames(p_df)]
+    if (clust){
+        ro <- hclust(dist(lor_df))$order
+        co <- hclust(dist(t(lor_df)))$order
+        rl <- rownames(lor_df)[ro]
+        cl <- colnames(lor_df)[co]
+    } else{
+        rl <- rownames(lor_df)
+        cl <- colnames(lor_df)
+    }
+
+    # melt data frames
     p_dfm <- reshape2::melt(as.matrix(p_df))
+    p_dfm[,1] <- factor(as.character(p_dfm[,1]), levels=rl)
+    p_dfm[,2] <- factor(as.character(p_dfm[,2]), levels=cl)
     lor_dfm <- reshape2::melt(as.matrix(lor_df))
+    lor_dfm[,1] <- factor(as.character(lor_dfm[,1]), levels=rl)
+    lor_dfm[,2] <- factor(as.character(lor_dfm[,2]), levels=cl)
 
     lor_dfm[,"p"] <- p_dfm[,"value"]
-    # colnames(lor_dfm)[colnames(lor_dfm) == "value"] <- "LOR"
 
     # remove entries with p > max_p
     kp <- lor_dfm[,"p"] <= max_p
@@ -109,7 +123,7 @@ heatmap_enr <- function(lor_df, p_df, max_p = 0.05){
     minp <- min(lor_dfm[,"p"], na.rm = TRUE)
     maxv <- max(abs(lor_dfm[,"value"]), na.rm = TRUE)
 
-    p <- ggplot(lor_dfm, aes_string(x = "Var1", y = "Var2", color = "value", size = "p")) + 
+    p <- ggplot(lor_dfm, aes_string(x = "Var2", y = "Var1", color = "value", size = "p")) + 
         geom_point() + 
         theme_bw() + 
         scale_size(trans="log10_rev", limits = c(0.05, minp)) + 
